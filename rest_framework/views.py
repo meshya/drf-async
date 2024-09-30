@@ -19,6 +19,7 @@ from rest_framework.schemas import DefaultSchema
 from rest_framework.settings import api_settings
 from rest_framework.utils import formatting
 
+from asgiref.sync import async_to_sync, iscoroutinefunction, sync_to_async
 
 def get_view_name(view):
     """
@@ -509,6 +510,10 @@ class APIView(View):
             else:
                 handler = self.http_method_not_allowed
 
+            # async support
+            if iscoroutinefunction(handler):
+                handler = async_to_sync(handler)
+        
             response = handler(request, *args, **kwargs)
 
         except Exception as exc:
